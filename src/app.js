@@ -4,13 +4,25 @@ const connectDB = require("./config/database");
 const app = express();
 const User = require("./models/user");
 
+app.use(express.json());
+
 app.post("/signup", async (req,res)=>{
-    const user = new User({
-        firstName: "virat",
-        lastName: "singh",
-        emailId: "navjot@gmail.com",
-        password: "navjot@123"
-    })
+    // console.log(req.body);
+
+    //This is for dynamic data
+
+    //Creating a new instance of user model.
+    const user = new User(req.body)
+
+
+    // This is for static data
+    // const user = new User({
+        
+    //     firstName: "Navjot",
+    //     lastName: "singh",
+    //     emailId: "navjot@gmail.com",
+    //     password: "navjot@123"
+    // })
 
     try{
     await user.save(); // This function return a promise.
