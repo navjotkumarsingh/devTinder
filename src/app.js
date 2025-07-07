@@ -87,6 +87,7 @@ app.patch("/user",async (req,res)=>{
     try {
         await User.findByIdAndUpdate({_id: userId}, data);
         res.send("Updated sucessfull!");
+        runValidators: true;
     } catch (err) {
         res.status(400).send("Error fetching user...");
     }
@@ -102,5 +103,3 @@ connectDB()
 .catch(err=>{
     console.log("Database can't be connected");
 })
-
-
