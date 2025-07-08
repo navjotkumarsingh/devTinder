@@ -3,33 +3,43 @@ const express = require('express');
 const connectDB = require("./config/database");
 const app = express();
 const User = require("./models/user");
-
+const { validateSignUpData } = require("./utils/validate");
+const bcrypt = require("bcrypt");
 app.use(express.json());
 
 //Signup API
 app.post("/signup", async (req,res) => {
-    // console.log(req.body);
+    try{
+    //Validation of data
+    validateSignUpData(req);
 
+    const {firstName,lastName,emailId,password} = req.body;
+    //Encrypt the password
+    const passwordHash = await bcrypt.hash(password,10);
+    console.log(passwordHash);
+
+    // console.log(req.body);
     //This is for dynamic data
 
     //Creating a new instance of user model.
-    const user = new User(req.body)
-
-
+    const user = new User({
+        firstName,
+        lastName,
+        emailId,
+        password: passwordHash,
+    })
     // This is for static data
     // const user = new User({
-        
     //     firstName: "Navjot",
     //     lastName: "singh",
     //     emailId: "navjot@gmail.com",
     //     password: "navjot@123"
     // })
-
-    try{
+    
     await user.save(); // This function return a promise.
     res.send("User added Sucessfully");
     }catch (err){
-        res.status(400).send("Error Saving the user..."+err.message)
+        res.status(400).send("ERROR : "+err.message)
     }
     // Creating the new intance of the user model
     // const user = new User(userObj);
