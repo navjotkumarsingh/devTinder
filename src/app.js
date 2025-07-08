@@ -60,13 +60,17 @@ app.post("/login",async(req,res)=>{
         const {emailId, password} = req.body;
         const user = await User.findOne({emailId: emailId});
         if(!user){
-            throw new Error("Not registered Email Id");
+            //Never give this message this lead to data leakage
+            //throw new Error("Not registered Email Id");
+            
+            //Use this
+            throw new Error("Invalid Credential");
         }
         const isPasswordValid = await bcrypt.compare(password,user.password);
         if(isPasswordValid){
             res.send("Login Sucessful!!!");
         }else{
-            throw new Error("Password is not correct");
+            throw new Error("Invalid Password");
             
         }
 
