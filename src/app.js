@@ -19,10 +19,10 @@ app.post("/signup", async (req,res) => {
     //Encrypt the password
     const passwordHash = await bcrypt.hash(password,10);
     console.log(passwordHash)
-    //Store the data
+    //Store the data...
 
     // console.log(req.body);
-
+      
     //This is for dynamic data
 
     //Creating a new instance of user model.
