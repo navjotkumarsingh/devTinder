@@ -3,17 +3,37 @@ const express = require('express');
 const connectDB = require("./config/database");
 const app = express();
 const User = require("./models/user");
+const { validateSignUpData } = require("./utils/validation");
+const bcrypt = require('bcrypt');
 
 app.use(express.json());
 
-//Signup API
+//*******     Signup API      ********
 app.post("/signup", async (req,res) => {
+
+    try{
+    //Validate the data
+    validateSignUpData(req);
+
+    const {firstName,lastName,emailId,password} = req.body;
+    //Encrypt the password
+    const passwordHash = await bcrypt.hash(password,10);
+    console.log(passwordHash)
+    //Store the data
+
     // console.log(req.body);
 
     //This is for dynamic data
 
     //Creating a new instance of user model.
-    const user = new User(req.body)
+    // const user = new User(req.body)
+    const user = new User({
+        firstName,
+         lastName,
+         emailId,
+         password: passwordHash
+    });
+
 
 
     // This is for static data
@@ -25,16 +45,37 @@ app.post("/signup", async (req,res) => {
     //     password: "navjot@123"
     // })
 
-    try{
     await user.save(); // This function return a promise.
     res.send("User added Sucessfully");
     }catch (err){
-        res.status(400).send("Error Saving the user..."+err.message)
+        res.status(400).send("ERROR! "+err.message);
     }
     // Creating the new intance of the user model
     // const user = new User(userObj);
 });
  
+// ********* LOGIN API ***************
+app.post("/login",async(req,res)=>{
+    try {
+        const {emailId, password} = req.body;
+        const user = await User.findOne({emailId: emailId});
+        if(!user){
+            throw new Error("Not registered Email Id");
+        }
+        const isPasswordValid = await bcrypt.compare(password,user.password);
+        if(isPasswordValid){
+            res.send("Login Sucessful!!!");
+        }else{
+            throw new Error("Password is not correct");
+            
+        }
+
+    } catch (error) {
+        res.status(400).send("ERROR: "+error.message);
+    }
+});
+
+
 //Get user by Email
 app.get("/users", async (req, res) => {
 
