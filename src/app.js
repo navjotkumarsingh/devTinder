@@ -80,11 +80,27 @@ app.delete("/user",async (req,res)=>{
 });
 
 //Update data API
-app.patch("/user",async (req,res)=>{
-    const userId = req.body.userId;
+app.patch("/user/:userId",async (req,res)=>{
+    // const userId = req.body.userId;
+    const userId = req.params?.userId;
     const data = req.body;
-
+    
     try {
+        //API level Validation.
+        const ALLOWED_UPDATES = [
+         "photourl", "about","gender","age","skills"
+        ];
+
+        const isUpdateAllowed = Object.keys(data).every(k => 
+            ALLOWED_UPDATES.includes(k)
+        );
+        if(data.skills.length >10){
+            throw new Error("Skills limit reached out!");
+            
+        }
+        if(!isUpdateAllowed){
+            throw new Error("Update not allowed");
+        }
         await User.findByIdAndUpdate({_id: userId}, data);
         res.send("Updated sucessfull!");
         runValidators: true;
