@@ -10,7 +10,7 @@ app.use(express.json());
 //Signup API
 app.post("/signup", async (req,res) => {
     try{
-    //Validation of data
+    //Validation of data.
     validateSignUpData(req);
 
     const {firstName,lastName,emailId,password} = req.body;
