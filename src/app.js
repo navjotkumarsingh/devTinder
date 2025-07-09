@@ -70,11 +70,11 @@ app.post("/login",async (req,res)=>{
             //Use this
             throw new Error("Invalid Credential");
         }
-        const isPasswordValid = await bcrypt.compare(password,user.password);
+        const isPasswordValid = await user.validatePassword(password);
         if(isPasswordValid){
             
             //Create a JWT Token
-            const token = await jwt.sign({ _id: user._id }, "DEV@TINDER$790", {expiresIn: "1h"});
+            const token = await user.getJWT();
             console.log(token);
             //Add the token to cookies and send the responce to user
             res.cookie("token", token, {
@@ -118,6 +118,7 @@ catch(err){
     res.send("Reading Cookie!");
 });
 
+//********** Connection Request API 
 app.post("/sendConnectionRequest", userAuth, async (req,res)=>{
     const user = req.user;
     //Sending connection request
