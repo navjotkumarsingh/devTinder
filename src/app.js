@@ -6,6 +6,8 @@ const User = require("./models/user");
 const { validateSignUpData } = require("./utils/validation");
 const bcrypt = require('bcrypt');
 const cookieParser = require("cookie-parser");
+const jwt = require("jsonwebtoken");
+const { userAuth } = require("./middlewares/auth");
 
 app.use(express.json());
 app.use(cookieParser());
@@ -72,9 +74,12 @@ app.post("/login",async (req,res)=>{
         if(isPasswordValid){
             
             //Create a JWT Token
-
+            const token = await jwt.sign({ _id: user._id }, "DEV@TINDER$790", {expiresIn: "1h"});
+            console.log(token);
             //Add the token to cookies and send the responce to user
-            res.cookie("token", "lknxsncsdcmsKcndslbfvlmxlaksndncdsn");
+            res.cookie("token", token, {
+                expires: new Date(Date.now() + 8*3600000),
+            });
             res.send("Login Sucessful!!!");
         }else{
             throw new Error("Invalid Password");   
@@ -85,85 +90,130 @@ app.post("/login",async (req,res)=>{
 });
 
 // PROFILE API
-app.get("/profile", async(req,res)=>{
-    const cookies = req.cookies;
-    console.log(cookies);
+app.get("/profile", userAuth, async(req,res)=>{
+try{
+    // const cookies = req.cookies;
+    // const { token } = cookies;
+    // if(!token){
+    //     throw new Error("Invalid token");
+    // }
+    //Validate the token
+    // const decodedMessage = await jwt.verify(token, "DEV@TINDER$790");
+   // console.log(decodedMessage);
+
+    // const { _id } = decodedMessage;
+    // console.log("Loged in user is: "+ _id);
+    
+    // const user = await User.findById(_id);
+    const user = req.user;
+    // if(!user){
+    //     throw new Error("Invalid request");
+    // }
+    res.send(user);
+}
+catch(err){
+    res.status(400).send("ERROR: "+err.message);
+}
+    // console.log(cookies);
     res.send("Reading Cookie!");
 });
 
-//Get user by Email
-app.get("/users", async (req, res) => {
-
-    const userEmail = req.body.emailId;
-
-    try {
-        const user = await User.find({ emailId: userEmail });
-        if(user.length===0){
-            res.status(404).send("User not found");
-        }
-        else{
-            res.send(user);
-        }
-        
-    } catch (err) {
-        res.status(400).send("Error fetching user...");
-    }
-
-});
-
-//Feed API
-app.get("/feed",async (req,res)=>{
-
-    try {
-        const users = await User.find();
-        res.send(users);
-        
-    } catch (err) {
-        res.status(400).send("Error fetching user...");
-    }
-});
-
-// Delete user API.
-app.delete("/user",async (req,res)=>{
-    const userId = req.body.userId;
-    try {
-        // const user = await User.findByIdAndDelete({_id: userId});
-        const user = await User.findByIdAndDelete(userId);
-        res.send("user deleted Sucessfully");
-    } catch (err) {
-        res.status(400).send("Error fetching user...");
-    } 
-});
-
-//Update data API
-app.patch("/user/:userId",async (req,res)=>{
-    // const userId = req.body.userId;
-    const userId = req.params?.userId;
-    const data = req.body;
+app.post("/sendConnectionRequest", userAuth, async (req,res)=>{
+    const user = req.user;
+    //Sending connection request
+    console.log("Sending a connnection request");
     
-    try {
-        //API level Validation.
-        const ALLOWED_UPDATES = [
-         "photourl", "about","gender","age","skills"
-        ];
-
-        const isUpdateAllowed = Object.keys(data).every(k => 
-            ALLOWED_UPDATES.includes(k)
-        );
-        if(data.skills.length >10){
-            throw new Error("Skills limit reached out!");
-            
-        }
-        if(!isUpdateAllowed){
-            throw new Error("Update not allowed");
-        }
-        await User.findByIdAndUpdate({_id: userId}, data);
-        res.send("Updated sucessfull!");
-        runValidators: true;
-    } catch (err) {
-        res.status(400).send("Error fetching user...");
-    }
+    res.send(user.firstName + " sent connection request!");
 });
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+//.  ********** RANDOM API ****************** 
+
+// //Get user by Email
+// app.get("/users", async (req, res) => {
+
+//     const userEmail = req.body.emailId;
+
+//     try {
+//         const user = await User.find({ emailId: userEmail });
+//         if(user.length===0){
+//             res.status(404).send("User not found");
+//         }
+//         else{
+//             res.send(user);
+//         }
+        
+//     } catch (err) {
+//         res.status(400).send("Error fetching user...");
+//     }
+
+// });
+
+// //Feed API
+// app.get("/feed",async (req,res)=>{
+
+//     try {
+//         const users = await User.find();
+//         res.send(users);
+        
+//     } catch (err) {
+//         res.status(400).send("Error fetching user...");
+//     }
+// });
+
+// // Delete user API.
+// app.delete("/user",async (req,res)=>{
+//     const userId = req.body.userId;
+//     try {
+//         // const user = await User.findByIdAndDelete({_id: userId});
+//         const user = await User.findByIdAndDelete(userId);
+//         res.send("user deleted Sucessfully");
+//     } catch (err) {
+//         res.status(400).send("Error fetching user...");
+//     } 
+// });
+
+// //Update data API
+// app.patch("/user/:userId",async (req,res)=>{
+//     // const userId = req.body.userId;
+//     const userId = req.params?.userId;
+//     const data = req.body;
+    
+//     try {
+//         //API level Validation.
+//         const ALLOWED_UPDATES = [
+//          "photourl", "about","gender","age","skills"
+//         ];
+
+//         const isUpdateAllowed = Object.keys(data).every(k => 
+//             ALLOWED_UPDATES.includes(k)
+//         );
+//         if(data.skills.length >10){
+//             throw new Error("Skills limit reached out!");
+            
+//         }
+//         if(!isUpdateAllowed){
+//             throw new Error("Update not allowed");
+//         }
+//         await User.findByIdAndUpdate({_id: userId}, data);
+//         res.send("Updated sucessfull!");
+//         runValidators: true;
+//     } catch (err) {
+//         res.status(400).send("Error fetching user...");
+//     }
+// });
 
 connectDB()
 .then(() => {
