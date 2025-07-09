@@ -8,12 +8,13 @@ const bcrypt = require('bcrypt');
 
 app.use(express.json());
 
-//*******     Signup API      ********
+//  ******** Signup API      ********
 app.post("/signup", async (req,res) => {
 
     try{
     //Validate the data
     validateSignUpData(req);
+
 
     const {firstName,lastName,emailId,password} = req.body;
     //Encrypt the password
@@ -55,14 +56,13 @@ app.post("/signup", async (req,res) => {
 });
  
 // ********* LOGIN API ***************
-app.post("/login",async(req,res)=>{
+app.post("/login",async (req,res)=>{
     try {
         const {emailId, password} = req.body;
         const user = await User.findOne({emailId: emailId});
         if(!user){
             //Never give this message this lead to data leakage
             //throw new Error("Not registered Email Id");
-            
             //Use this
             throw new Error("Invalid Credential");
         }
@@ -70,10 +70,8 @@ app.post("/login",async(req,res)=>{
         if(isPasswordValid){
             res.send("Login Sucessful!!!");
         }else{
-            throw new Error("Invalid Password");
-            
+            throw new Error("Invalid Password");   
         }
-
     } catch (error) {
         res.status(400).send("ERROR: "+error.message);
     }
