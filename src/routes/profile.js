@@ -1,9 +1,9 @@
 const express = require('express');
 const profileRouter = express.Router();
-
+const { validateEditProfileData } = require("../utils/validation");
 const { userAuth } = require("../middlewares/auth");
 
-profileRouter.get("/profile", userAuth, async(req,res)=>{
+profileRouter.get("/profile/view", userAuth, async(req,res)=>{
 try{
     // const cookies = req.cookies;
     // const { token } = cookies;
@@ -31,4 +31,23 @@ catch(err){
     res.send("Reading Cookie!");
 });
 
+profileRouter.patch("/profile/edit", userAuth, async (req,res)=>{
+    try {
+        if(!validateEditProfileData(req)){
+            throw new Error("Invalid Edit Request");
+        }
+        const loggedInUser = req.user;
+        
+        Object.keys(req.body).forEach((key) =>(loggedInUser[key]=req.body[key]));
+        await loggedInUser.save();
+        // res.send("Profile Updated Sucessfully!");
+        res.json({
+            message: `${loggedInUser.firstname}, your profile updated sucessfully`,
+            data: loggedInUser,
+        });
+
+    } catch (err) {
+        res.status(400).send("ERROR: "+err.message);
+    }
+});
 module.exports=profileRouter;
