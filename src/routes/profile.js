@@ -28,7 +28,7 @@ catch(err){
     res.status(400).send("ERROR: "+err.message);
 }
     // console.log(cookies);
-    res.send("Reading Cookie!");
+    // res.send("Reading Cookie!");
 });
 
 profileRouter.patch("/profile/edit", userAuth, async (req,res)=>{
