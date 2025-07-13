@@ -69,11 +69,12 @@ const userSchema = new mongoose.Schema({
     timestamps: true,
 });
 
+//compound index
+userSchema.index({ firstName: 1, lastName: 1 });
+
 userSchema.methods.getJWT = async function(){
     const user = this;
-
-    const token = await jwt.sign({ _id: user._id }, "DEV@TINDER$790", {expiresIn: "1h"});
-
+    const token = await jwt.sign({ _id: user._id }, "DEV@TINDER$790", {expiresIn: "7d"});
     return token;
 }
 
@@ -84,6 +85,7 @@ userSchema.methods.validatePassword = async function (passwordInputByUser) {
 
     return isPasswordValid;
 }
+mongoose.model("User", userSchema);
 module.exports = mongoose.model("User",userSchema);
 
 // const User = mongoose.model("User",userSchema);
